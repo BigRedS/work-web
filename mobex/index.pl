@@ -89,7 +89,7 @@ sub startTable(){
 			<br /><br />
 			<table>
 				<tr>
-					<th>Name</th><th>Mobex</th>
+					<th>Name</th><th>From Deskphone</th><th>From Mobile</th>
 				</tr>
 EOF
 }
@@ -102,7 +102,7 @@ sub midTable() {
 	for my $k (sort keys %$matches){
 		print <<EOF
 				<tr>
-					<td>$k</td><td>$$matches{$k}</td>
+					<td>$k</td><td>71$$matches{$k}</td><td>$$matches{$k}</td>
 				</tr>
 EOF
 	}
