@@ -1,0 +1,105 @@
+#! /usr/bin/perl
+
+use 5.010;
+use DBI;
+use CGI qw(param);
+
+my $orderby;
+$orderby = param('s') if param('s');
+$orderby = "namea" if !param('s');
+
+## Connect to DB:
+my $dbh = DBI->connect('dbi:mysql:ORG16;host=kbox.st-ives.int', 'R16', 's3rv1c3?') or die "Couldn't connect to db";
+
+
+## Get list of software in label id 52 (per-seat license) and make an array of their IDs:
+my $sql = "select software_id from SOFTWARE_LABEL_JT where label_id = '52'";
+my $sth = $dbh->prepare($sql);
+$sth->execute or die "SQL Error: $DBI::errstr\n";
+my @software_ids;
+while (@row = $sth->fetchrow_array) {
+	push @software_ids, @row[0];
+} 
+
+
+## For each software ID above, count how many times we've got it installed on the network:
+$sql = "select SOFTWARE_ID, count(*) from MACHINE_SOFTWARE_JT where SOFTWARE_ID=? group by SOFTWARE_ID";
+$sth = $dbh->prepare($sql);
+my %software_id_count;
+foreach (@software_ids){
+	$sth->execute($_) or die "MySQLError: $DBI::errstr\n";
+	while (@row = $sth->fetchrow_array){
+		$software_id_count{$row[0]} = $row[1];
+	}
+}
+
+
+## Go through the above-created hash to make a hash of name-ids for the software which we can nicely tabulate.
+$sql = "select DISPLAY_NAME from SOFTWARE where ID = ?";
+$sth = $dbh->prepare($sql);
+my %software_name_id;
+while (my($id, $count) = each (%software_id_count)){
+	$sth->execute($id) or die "MySQLError: $DBI::errstr\n";
+	while (@row = $sth->fetchrow_array){
+		my $display_name = $row[0];
+		$software_name_id{$display_name}.=",".$id;
+	}
+}
+
+## Now we have two hashes:
+## 	%software_id_count{id} = "count"
+## and
+## 	%software_name_id{name} = "list of ids"
+##
+## Which make it nice and easy to search by name.
+
+
+## Print out the results:
+print "content-type:text/html\n\n\n";
+say "<html><table border='1'>";
+say "<h1>Software subject to per-seat licenses</h1>";
+say "<p>This runs queries against the MySQL server on the KBox. They are reasonably expensive queries (and there's several of them), and they take a while.</p>";
+say "<p>Clicking the 'asc' or 'desc' links refreshes the page, so it reruns the query.</p>";
+if ($software_name_id{""}){say "<strong>Warning:</strong> I've got an unexpected data structure, %software_name_id{\"\"} appears to exist: <tt>".$software_name_id{""}."</tt>";}
+say "<a href='label.txt'>Source</a>";
+
+say "<tr><th>Name <a href='?s=namea'>asc</a> <a href='?s=named'>desc</a></th><th>Count<!--<a href='?s=counta'>asc</a> <a href='?s=countd'>desc</a> --></th></tr>";
+given($orderby) {
+	when (/namea/) {
+		foreach $key (sort (keys(%software_name_id))){
+			my $name = $key;
+			my @ids = split(/,/ , $software_name_id{$key});
+			my $count = 0;
+			foreach (@ids){
+				$count+=$software_id_count{$_};
+			}
+			say "<tr><td>$name</td><td>$count</td></tr>";
+		}
+		break;
+	}
+	when (/named/){
+		foreach $key (reverse (sort (keys (%software_name_id)))){
+			my $name = $key;
+			my @ids = split(/,/ , $software_name_id{$key});
+			my $count = 0;
+			foreach (@ids){
+				$count+=$software_id_count{$_};
+			}
+			say "<tr><td>$name</td><td>$count</td></tr>";
+		}
+		break;
+	}
+#	when (/counta/){
+#		foreach $key (sort {$software_count{$a} <=> $software_count{$b}}(keys (%software_count))){
+#			say "<tr><td>$key</td><td>$software_count{$key}</td></td>";
+#		}
+#		break;
+#	}
+#	when (/countd/){	
+#		foreach $key (sort {$software_count{$b} <=> $software_count{$a}}(keys (%software_count))){
+#			say "<tr><td>$key</td><td>$software_count{$key}</td></td>";
+#		}
+#		break;
+#	}
+}
+say "</table></html>";

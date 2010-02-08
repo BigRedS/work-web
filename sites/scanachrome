@@ -1,0 +1,31 @@
+Servers:
+scan-svr01	10.45.0.1
+scan-svr02	10.45.0.2
+scan-svr05	10.45.0.5
+scan-lacienas	10.45.0.3
+
+
+Services:
+
+dhcp	scan-svr01
+dns1	scan-svr01
+dns2	scan-svr02
+ftp	scan-svr02
+gateway	10.45.0.40
+job bag	scan-svr05
+mail	jup-svr09
+print	scan-svr01
+prod-route	scan-svr02
+rdp	scan-svr07
+shared	scan-svr01
+users	scan-svr01
+
+People:
+
+Tech	Mark Green, Malcolm Brindle, Simon Gabriel
+MD	Stephen Arthur
+FD	Malcolm Brindle
+Production	Simon Gabirel, Mark Green
+
+Nuances:
+scan-svr07 is in wandsworth

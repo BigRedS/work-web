@@ -1,0 +1,26 @@
+Servers:
+hayes-svr01	10.44.0.1
+hayes-svr02	10.44.0.2
+Services:
+
+dhcp
+dns1
+dns2
+ftp
+gateway
+job bag	hayes-svr02
+mail
+print	hayes-svr02
+prod-route
+rdp
+shared	hayes-svr02
+users	hayes-svr02
+
+People:
+
+Geek
+MD
+FD
+Production
+
+Nuances:

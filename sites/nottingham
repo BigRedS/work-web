@@ -1,0 +1,27 @@
+Servers:
+notts-svr01	10.43.0.1
+notts-svr02	10.43.0.2
+Services:
+
+apps	notts-svr02
+dhcp
+dns1
+dns2
+ftp	notts-svr02
+gateway
+job bag	
+mail
+print	notts-svr02
+prod-route
+rdp
+shared	notts-svr02
+users	notts-svr02
+
+People:
+
+Geek
+MD
+FD
+Production
+
+Nuances:

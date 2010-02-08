@@ -1,0 +1,96 @@
+This is the pretty face and sort-of refactoring of my myriad scripts for keeping an
+eye on filesystem usage by users of our shares. I've also spilled it all over 
+Wandsworth
+Something like Nagios would do a better job, but require some configuration and 
+learning and the like. 
+Changes happen at odd times when it's quiet and when I don't need to be out of work
+until quite late. This is also when breakages happen. It should be stable during 
+normal office hours.
+
+The idea is to make it easier to keep track of how much space is occupied by the
+various shares (with a view to keeping tabs on space on backup tapes), and make it
+really easy to identify culprits and reprimand them.
+
+The current model is a nightly 'scan' of the shares, but if they get too big that
+might change to weekly or doing it in batches.
+
+
+== Using it ==
+==============
+
+All lists are currently ordered by filesize. I intend to make them orderable by
+something else when I work out what else it would be useful to order them by. 
+
+U: Drive Files
+	A list of how many files each person has in their U: drive that
+	matched the find-by-extension search, and how much space they're occupying.
+
+U: Drive Sizes
+	A list of U: drive sizes
+
+Shares
+	A list of smb shares and the on-disc size their directory occupies.
+
+PSTs	
+	A list of all files ending .pst on a 'users' share.
+
+For an up-to-date list of what's being searched, look at the block of text in
+filefinder.pl between the lines `## List of shares to check` and `my $time=time();`
+(currently about 23-40).
+
+
+== How It Works ==
+==================
+
+In short:
+
+filefinder.pl crawls the filetree specificed in the hash at its top. It outputs what
+it finds to filelist.
+On visiting the index page, files.pl is invoked, which reads filelist and displays
+what it found.
+
+
+In Longer:
+
+This consists of three perl scripts and a text file. In ascending order of complexity:
+
+files
+	A list of files, as output by filefinder.pl The first word of each line denotes 
+	what that line represents:
+		file	A file found by extension matching
+		usersum	The summary of disk usage of a users' directory
+		sum	The summary of disk usage of an smb share
+		pst	A pst file
+
+	It is parsed by files.pl and displayed through index.pl. It is designed
+	to be sensibly formatted such that you can do whatever you want as far
+	as generating reports off it goes.
+
+index.pl
+	Displays the webpage. Calls files.pl and echos its output verbatim. 
+
+files.pl	
+	Parses a formatted list of files, and echos particular ones in
+	particular ways, depending on what the line begins with.
+	Accepts as arguments 'html', 'sum', 'usersum' and 'users' in any order.
+	'html' causes it to produce html output (else tab-delimted), the others
+	define which files it bothers to search. You don't want to do more than one
+	at a time, currently.
+
+filefinder.pl
+	The one that does the work. Has an array of file extensions and a hash of smb
+	shares. Builds a find command from the former with which to search the
+	latter. Spits hardly-formatted results out to the filelist. While it's at
+	it, produces directory summaries. Sort-of designed with speed in mind, but
+	it's a big chunk of data to move around the net.
+
+The scripts themselves are (fairly) liberally commented.
+
+
+== Notes/bugs ==
+================
+
+1KB = 1024B, not 1000B. This is not a bug.
+'Share name' only displays the first word. 
+
+
