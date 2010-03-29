@@ -16,7 +16,7 @@ if ($submit =~ /Revert/i){
 
 	print "There, I fixed it for you. Don't do that again.";
 }else{
-	print "<form action='revert.pl'>
+	print "<form action='revert.pl' method='post'>
 		<input type='submit' name='submit' value='Revert my last changes please'>
 	";
 }
