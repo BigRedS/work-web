@@ -23,6 +23,7 @@ table,tr{
 
 th{
 	border: 	1px solid #000;
+	padding:	3px;
 }
 
 td{
@@ -30,6 +31,6 @@ td{
 	padding:	3px;
 }
 
-col{
-	width:		40px;
+td.number{
+	text-align:	center;
 }
